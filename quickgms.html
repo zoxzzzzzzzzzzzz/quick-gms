@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>quick gms</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        :root {
+            --sword: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='36' height='36' viewBox='0 0 36 36'%3E%3Crect x='16' y='2' width='4' height='22' rx='1' fill='%23cc1111'/%3E%3Crect x='16' y='2' width='4' height='22' rx='1' fill='url(%23blade)'/%3E%3Cdefs%3E%3ClinearGradient id='blade' x1='0' y1='0' x2='1' y2='0'%3E%3Cstop offset='0' stop-color='%23ff4444'/%3E%3Cstop offset='1' stop-color='%23881111'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect x='10' y='22' width='16' height='3' rx='1.5' fill='%23660000'/%3E%3Crect x='15' y='25' width='6' height='8' rx='1' fill='%23440000'/%3E%3Cpolygon points='18,2 16,6 20,6' fill='%23ff6666'/%3E%3C/svg%3E") 18 2;
+        }
+
+        body, html {
+            background: #0d0000;
+            min-height: 100vh;
+            font-family: system-ui, -apple-system, sans-serif;
+            color: #d4d4d4;
+            cursor: var(--sword), default;
+        }
+
+        #topbar {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            background: #120000;
+            border-bottom: 1px solid #3a0a0a;
+            padding: 0 16px;
+            display: flex;
+            align-items: center;
+            gap: 2px;
+            overflow-x: auto;
+            scrollbar-width: none;
+            height: 38px;
+        }
+        #topbar::-webkit-scrollbar { display: none; }
+        #topbar-title {
+            font-size: 13px;
+            font-weight: 600;
+            color: #882222;
+            letter-spacing: 1px;
+            padding-right: 12px;
+            border-right: 1px solid #2a0606;
+            margin-right: 6px;
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
+        .nav-btn {
+            background: none;
+            border: none;
+            color: #aa4444;
+            font-family: inherit;
+            font-size: 13px;
+            font-weight: 600;
+            padding: 4px 10px;
+            border-radius: 3px;
+            cursor: var(--sword), pointer;
+            white-space: nowrap;
+            transition: background 0.1s, color 0.1s;
+            flex-shrink: 0;
+        }
+        .nav-btn:hover { background: #1e0000; color: #ee4444; }
+
+        .wrap { padding: 24px 20px; max-width: 860px; margin: 0 auto; }
+
+        h1 { text-align: center; font-size: 28px; font-weight: 700; letter-spacing: 2px; color: #cc2222; margin-bottom: 24px; }
+
+        .row { display: flex; gap: 8px; margin-bottom: 16px; }
+
+        input[type=text] {
+            flex: 1;
+            background: #110000;
+            border: 1px solid #2e0707;
+            color: #c4c4c4;
+            padding: 9px 13px;
+            font-family: inherit;
+            font-size: 14px;
+            border-radius: 3px;
+            outline: none;
+            transition: border-color 0.15s;
+            cursor: var(--sword), text;
+        }
+        input[type=text]::placeholder { color: #3a1010; }
+        input[type=text]:focus { border-color: #661111; }
+
+        .btn {
+            background: #110000;
+            border: 1px solid #2a0606;
+            color: #6b2a2a;
+            font-family: inherit;
+            font-size: 13px;
+            padding: 9px 15px;
+            border-radius: 3px;
+            cursor: var(--sword), pointer;
+            transition: background 0.12s, border-color 0.12s, color 0.12s;
+            white-space: nowrap;
+        }
+        .btn:hover { background: #180000; border-color: #551010; color: #aa3535; }
+        .btn:active { transform: scale(0.97); }
+        .btn.toggled { border-color: #661111; color: #993333; }
+
+        hr { border: none; border-top: 1px solid #1a0303; margin-bottom: 20px; }
+
+        .settings { background: #0f0000; border: 1px solid #1e0505; border-radius: 3px; padding: 14px; margin-bottom: 16px; display: none; }
+        .settings.open { display: block; }
+        .s-label { font-size: 10px; color: #4a1a1a; text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 10px; }
+        .s-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 7px; }
+        .s-row { display: flex; align-items: center; justify-content: space-between; padding: 7px 11px; background: #110000; border: 1px solid #1e0404; border-radius: 3px; }
+        .s-name { font-size: 12px; color: #6a2e2e; }
+        .tog { width: 30px; height: 17px; background: #1a0303; border: 1px solid #320808; border-radius: 9px; position: relative; cursor: var(--sword), pointer; transition: background 0.15s; flex-shrink: 0; }
+        .tog.on { background: #4d0c0c; border-color: #771111; }
+        .tog::after { content: ''; position: absolute; top: 2px; left: 2px; width: 11px; height: 11px; background: #330808; border-radius: 50%; transition: transform 0.15s, background 0.15s; }
+        .tog.on::after { transform: translateX(13px); background: #cc2222; }
+        select { background: #110000; border: 1px solid #220606; color: #6a2e2e; font-family: inherit; font-size: 12px; padding: 3px 6px; border-radius: 3px; outline: none; cursor: var(--sword), pointer; }
+
+        input[type=button],
+        #sections-container input[type=button] {
+            background: #0d0000 !important;
+            background-color: #0d0000 !important;
+            background-image: none !important;
+            border: 1px solid #2a0606 !important;
+            border-radius: 3px !important;
+            color: #6b2a2a !important;
+            box-shadow: none !important;
+            font-family: inherit !important;
+            font-size: 14px !important;
+            padding: 12px 18px !important;
+            text-align: left !important;
+            width: 100% !important;
+            max-width: 600px !important;
+            cursor: var(--sword), pointer !important;
+            transition: background 0.12s, border-color 0.12s, color 0.12s !important;
+        }
+        input[type=button]:hover,
+        #sections-container input[type=button]:hover {
+            background: #150000 !important;
+            background-color: #150000 !important;
+            border-color: #661111 !important;
+            color: #bb3838 !important;
+            box-shadow: none !important;
+            transform: none !important;
+        }
+        input[type=button]:active,
+        #sections-container input[type=button]:active {
+            transform: scale(0.98) !important;
+        }
+
+        .sidebar-btn { display: none; }
+
+        #sections-container { min-height: 120px; }
+        .empty { text-align: center; padding: 48px 0; color: #2a0808; font-size: 13px; }
+
+        .letter-header {
+            color: #661111 !important;
+            font-size: 20px !important;
+            font-weight: 600 !important;
+            border-bottom: 1px solid #1e0404 !important;
+            padding-bottom: 6px !important;
+            margin-bottom: 12px !important;
+            text-shadow: none !important;
+        }
+        .letter-section { margin-bottom: 32px !important; padding: 0 !important; max-width: 100% !important; }
+    </style>
+</head>
+<body>
+    <div id="topbar"><span id="topbar-title">quick gms</span></div>
+
+    <div class="wrap">
+        <h1>quick gms</h1>
+        <h1>yes this was rushed</h1>
+        <h1>bye have fun playing...</h1>
+        <h1>genuinely stop reading ts</h1>
+        <div class="row">
+            <input type="text" placeholder="search" id="searchInput">
+            <button class="btn" id="stog" onclick="var p=document.getElementById('sp');p.classList.toggle('open');this.classList.toggle('toggled')">settings</button>
+            <button class="btn" id="lbtn" onclick="loadGames()">load games</button>
+        </div>
+        <div class="settings" id="sp">
+            <div class="s-label">settings</div>
+            <div class="s-grid">
+                <div class="s-row"><span class="s-name">animations</span><div class="tog on" onclick="this.classList.toggle('on')"></div></div>
+                <div class="s-row"><span class="s-name">compact</span><div class="tog" onclick="this.classList.toggle('on')"></div></div>
+                <div class="s-row"><span class="s-name">dark mode</span><div class="tog on" onclick="this.classList.toggle('on')"></div></div>
+                <div class="s-row"><span class="s-name">sort</span><select><option>popular</option><option>newest</option><option>a-z</option><option>random</option></select></div>
+                <div class="s-row"><span class="s-name">grid size</span><select><option>medium</option><option>small</option><option>large</option></select></div>
+            </div>
+        </div>
+        <hr>
+        <div id="sections-container"><div class="empty">no games loaded</div></div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/gh/bubbls/ugs-singlefile@main/searchbut.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/bubbls/ugs-singlefile@latest/games.js"></script>
+    <script>
+        var settings = JSON.parse(localStorage.getItem('qgms_settings') || '{}');
+
+        var disguisePresets = {
+            none:    { title: 'quick gms',              favicon: '' },
+            ixl:     { title: 'IXL | Math, Language Arts, Science',  favicon: 'https://www.ixl.com/favicon.ico' },
+            khan:    { title: 'Khan Academy',            favicon: 'https://cdn.kastatic.org/images/favicon.ico' },
+            google:  { title: 'Google Classroom',        favicon: 'https://ssl.gstatic.com/classroom/favicon.png' },
+            docs:    { title: 'Google Docs',             favicon: 'https://ssl.gstatic.com/docs/documents/images/kix-favicon7.ico' },
+            custom:  { title: '', favicon: '' }
+        };
+
+        function applyDisguise(key) {
+            var preset = disguisePresets[key] || disguisePresets.none;
+            var title = (key === 'custom' && settings.customTitle) ? settings.customTitle : preset.title;
+            var favicon = (key === 'custom' && settings.customFavicon) ? settings.customFavicon : preset.favicon;
+            document.title = title;
+            var link = document.getElementById('dyn-favicon');
+            if (!link) { link = document.createElement('link'); link.id = 'dyn-favicon'; link.rel = 'icon'; document.head.appendChild(link); }
+            link.href = favicon || 'data:,';
+        }
+
+        function applyBackground(val) {
+            if (val && val !== 'default') {
+                document.body.style.backgroundImage = 'url(' + val + ')';
+                document.body.style.backgroundSize = 'cover';
+                document.body.style.backgroundPosition = 'center';
+                document.body.style.backgroundAttachment = 'fixed';
+            } else {
+                document.body.style.backgroundImage = '';
+            }
+        }
+
+        function saveSettings() {
+            localStorage.setItem('qgms_settings', JSON.stringify(settings));
+        }
+
+        function panic() {
+            window.location.href = 'https://www.ixl.com';
+        }
+
+        document.addEventListener('keydown', function(e) {
+            if (settings.panicKey && e.key === settings.panicKey) panic();
+        });
+
+        function loadGames() {
+            var b = document.getElementById('lbtn');
+            b.textContent = 'loading...'; b.style.opacity = '0.5';
+            var s = document.createElement('script');
+            s.src = 'https://cdn.jsdelivr.net/gh/bubbls/ugs-singlefile@latest/games.js';
+            s.onload = function() { b.textContent = 'loaded'; b.style.opacity = '1'; buildNav(); };
+            s.onerror = function() { b.textContent = 'retry'; b.style.opacity = '1'; };
+            document.body.appendChild(s);
+        }
+
+        function buildNav() {
+            var bar = document.getElementById('topbar');
+            var title = bar.querySelector('#topbar-title');
+            bar.innerHTML = '';
+            if (title) bar.appendChild(title);
+            var sections = document.querySelectorAll('.letter-section');
+            sections.forEach(function(sec) {
+                var hdr = sec.querySelector('.letter-header');
+                if (!hdr) return;
+                var letter = hdr.textContent.trim();
+                var btn = document.createElement('button');
+                btn.className = 'nav-btn';
+                btn.textContent = letter;
+                btn.onclick = function() { sec.scrollIntoView({ behavior: 'smooth', block: 'start' }); };
+                bar.appendChild(btn);
+            });
+        }
+
+        function renderSettings() {
+            var d = settings.disguise || 'none';
+            document.getElementById('set-disguise').value = d;
+            document.getElementById('set-custom-title').value = settings.customTitle || '';
+            document.getElementById('set-custom-favicon').value = settings.customFavicon || '';
+            document.getElementById('set-bg').value = settings.bg || '';
+            document.getElementById('set-panic-key').value = settings.panicKey || 'Escape';
+            document.getElementById('custom-fields').style.display = d === 'custom' ? 'flex' : 'none';
+        }
+
+        function onDisguiseChange(val) {
+            settings.disguise = val;
+            document.getElementById('custom-fields').style.display = val === 'custom' ? 'flex' : 'none';
+            applyDisguise(val);
+            saveSettings();
+        }
+
+        window.addEventListener('load', function() {
+            buildNav();
+            applyDisguise(settings.disguise || 'none');
+            applyBackground(settings.bg);
+            renderSettings();
+        });
+
+        var observer = new MutationObserver(function() { buildNav(); });
+        observer.observe(document.getElementById('sections-container'), { childList: true, subtree: true });
+    </script>
+</body>
+</html>
